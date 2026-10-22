@@ -1,0 +1,2 @@
+import {Language} from '@/data/services';
+export function LanguageToggle({value,onChange}:{value:Language;onChange:(value:Language)=>void}){return <div className="language-toggle" role="group" aria-label="About and services language"><button aria-pressed={value==='en'} onClick={()=>onChange('en')}>EN</button><button lang="hi" aria-pressed={value==='hi'} onClick={()=>onChange('hi')}>हिन्दी</button></div>;}

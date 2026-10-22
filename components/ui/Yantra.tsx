@@ -1,0 +1,3 @@
+export function Yantra({ className = '' }: { className?: string }) {
+ return <svg className={className} viewBox="0 0 400 400" fill="none" aria-hidden="true"><g stroke="currentColor" strokeWidth="1"><circle cx="200" cy="200" r="180"/><circle cx="200" cy="200" r="165"/><circle cx="200" cy="200" r="133"/>{Array.from({length:16},(_,i)=><ellipse key={i} cx="200" cy="66" rx="17" ry="31" transform={`rotate(${i*22.5} 200 200)`}/>)}<path d="M200 69 318 274H82Z M200 325 77 113H323Z M200 105 298 275H102Z M200 292 104 126H296Z M200 137 280 276H120Z M200 267 125 137H275Z M200 166 265 279H135Z M200 245 148 155H252Z M200 183 234 242H166Z"/><circle cx="200" cy="218" r="4" fill="currentColor"/></g></svg>;
+}

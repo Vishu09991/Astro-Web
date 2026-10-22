@@ -1,0 +1,2 @@
+import {Yantra} from '@/components/ui/Yantra';
+export function Footer(){return <footer><div className="shell footer-main"><a href="#home" className="brand"><Yantra/><span>Shri Parashar Guruji<small>VEDIC WISDOM · SACRED TRADITIONS</small></span></a><p>Ancient wisdom.<br/>A more harmonious tomorrow.</p><a href="#home" className="text-link">Back to top ↑</a></div><div className="shell footer-bottom"><span>© {new Date().getFullYear()} Shri Parashar Guruji. All rights reserved.</span><span>Tradition with reverence. Guidance with care.</span></div></footer>;}

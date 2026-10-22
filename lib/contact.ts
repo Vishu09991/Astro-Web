@@ -1,0 +1,4 @@
+import {z} from 'zod';
+import {services} from '@/data/services';
+export const contactSchema=z.object({name:z.string().trim().min(2,'Please enter your full name.').max(120),phone:z.string().trim().min(7).max(25).regex(/^[+\d\s()\-]+$/,'Please enter a valid phone number.'),email:z.union([z.email(),z.literal('')]).optional(),service:z.string().refine(s=>s==='general'||services.some(item=>item.id===s),'Please select a valid service.'),message:z.string().trim().min(10,'Please include at least 10 characters in your message.').max(3000),website:z.string().max(0).optional()});
+export function whatsappUrl(phone:string,service:string,message=''){const digits=phone.replace(/\D/g,'');if(digits.length<8||digits.length>15)return null;return `https://wa.me/${digits}?text=${encodeURIComponent(`Namaste Guruji, I would like to enquire about ${service || 'a consultation'}.${message.trim()?`\n\n${message.trim()}`:''}`)}`;}
