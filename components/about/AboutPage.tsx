@@ -1,0 +1,19 @@
+'use client';
+import {useEffect,useState} from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import {ArrowLeft,ArrowRight,ImagePlus,Pause,Play} from 'lucide-react';
+import {useReducedMotion} from 'motion/react';
+import {Header} from '@/components/layout/Header';
+import {Footer} from '@/components/layout/Footer';
+import {useLanguage} from '@/components/i18n/LanguageProvider';
+import {gallery} from '@/data/site';
+import {about} from '@/data/translations/about';
+export function AboutPage(){
+ const {language,t}=useLanguage();const [index,setIndex]=useState(0);const [playing,setPlaying]=useState(false);const [hovered,setHovered]=useState(false);const [focused,setFocused]=useState(false);const reduced=useReducedMotion();
+ const photo=gallery[index];
+ useEffect(()=>{if(!playing||reduced||hovered||focused||gallery.length<2)return;const timer=setInterval(()=>{if(!document.hidden)setIndex(i=>(i+1)%gallery.length);},5000);return()=>clearInterval(timer);},[playing,reduced,hovered,focused]);
+ function move(delta:number){setIndex(i=>(i+delta+gallery.length)%gallery.length);setPlaying(false);}
+ return <><Header/><main id="main"><section className="section shell about-page-intro"><span className="eyebrow">{t('MEET GURUJI')}</span><h1>{t('A life of devotion.')}<br/><em>{t('A spirit of service.')}</em></h1><p>{t('Shri Parashar Guruji, lovingly called Bhaiiya, welcomes you to a space of devotion, thoughtful conversation, and traditional worship.')}</p><div className="about-story"><h2>{t('The introduction')}</h2><div><p>{about[language].body}</p><p>{about[language].philosophy}</p><p className="editorial-note">{t('This introduction will be expanded with Guruji’s approved biography, spiritual background, and personal journey. No qualifications or years of experience have been assumed.')}</p></div></div></section><section className="shell about-slideshow-section"><h2>{t('Pujas, yagyas & moments of service')}</h2><p>{t('Browse moments from Guruji’s spiritual journey. Original photographs will replace these marked spaces.')}</p><div className="about-slideshow" role="region" aria-roledescription={language==='hi'?'स्लाइडशो':'carousel'} aria-label={t('Photo slideshow')} tabIndex={0} onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)} onFocusCapture={()=>setFocused(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocused(false);}} onKeyDown={e=>{if(e.key==='ArrowLeft'){e.preventDefault();move(-1);}if(e.key==='ArrowRight'){e.preventDefault();move(1);}}}><div className="slideshow-photo" key={index}>{photo.src?<Image src={photo.src} alt={t(photo.title)} fill sizes="(max-width: 760px) 100vw, 1100px"/>:<div className="empty-state"><ImagePlus size={64} strokeWidth={.8}/><h3>{t(photo.category)}</h3><p>{t('Guruji’s original photograph will be added here.')}</p></div>}</div><div className="lightbox-controls"><button className="icon-button" aria-label={t('Previous photograph')} onClick={()=>move(-1)}><ArrowLeft/></button><div aria-live={playing?'off':'polite'} aria-atomic="true"><h3>{t(photo.title)}</h3><small>{index+1} / {gallery.length} · {t(photo.category)}</small></div><button className="icon-button" aria-label={t('Next photograph')} onClick={()=>move(1)}><ArrowRight/></button></div><div className="slideshow-dots">{gallery.map((item,i)=><button key={item.title} aria-label={`${t(item.category)} · ${i+1}`} aria-pressed={i===index} onClick={()=>{setIndex(i);setPlaying(false);}}/>)}<button className="slideshow-play" disabled={!!reduced} aria-label={t(playing?'Pause slideshow':'Play slideshow')} onClick={()=>setPlaying(!playing)}>{playing?<Pause size={16}/>:<Play size={16}/>}</button></div></div><div className="about-page-actions"><Link className="button" href="/#contact">{t('Discuss a ceremony')} <ArrowRight size={17}/></Link><Link href="/" className="text-link">{t('Back to home')}</Link></div></section></main><Footer/></>;
+}
+

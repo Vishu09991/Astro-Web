@@ -1,7 +1,8 @@
 'use client';
+import {useLanguage} from '@/components/i18n/LanguageProvider';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
-export function Modal({title,children,onClose,wide=false}:{title:string;children:ReactNode;onClose:()=>void;wide?:boolean}) {
+export function Modal({title,children,onClose,wide=false}:{title:string;children:ReactNode;onClose:()=>void;wide?:boolean}) {const {t:tr}=useLanguage();
  const ref=useRef<HTMLDialogElement>(null);
  const closeRef=useRef(onClose);
  useEffect(()=>{closeRef.current=onClose;},[onClose]);
@@ -11,5 +12,5 @@ export function Modal({title,children,onClose,wide=false}:{title:string;children
   dialog?.showModal(); document.body.style.overflow='hidden';
   return ()=>{dialog?.close(); document.body.style.overflow=overflow; previous?.focus();};
  },[]);
- return <dialog ref={ref} aria-label={title} className={`modal ${wide?'modal-wide':''}`} onCancel={(event)=>{event.preventDefault();closeRef.current();}} onClick={(event)=>{if(event.target===event.currentTarget){const r=event.currentTarget.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)onClose();}}}><div className="modal-top"><span className="eyebrow">SHRI PARASHAR GURUJI</span><button className="icon-button" aria-label="Close dialog" onClick={onClose} autoFocus><X size={21}/></button></div>{children}</dialog>;
+ return <dialog ref={ref} aria-label={title} className={`modal ${wide?'modal-wide':''}`} onCancel={(event)=>{event.preventDefault();closeRef.current();}} onClick={(event)=>{if(event.target===event.currentTarget){const r=event.currentTarget.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)onClose();}}}><div className="modal-top"><span className="eyebrow">{tr("SHRI PARASHAR GURUJI")}</span><button className="icon-button" aria-label={tr("Close dialog")} onClick={onClose} autoFocus><X size={21}/></button></div>{children}</dialog>;
 }

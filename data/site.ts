@@ -1,6 +1,6 @@
 export const site = {
   name: 'Shri Parashar Guruji',
-  phone: '', whatsapp: '', email: '', address: '', mapsUrl: '',
+  phone: '+91 78781 49322', whatsapp: '917878149322', email: 'contact@parasharguruji.com', address: '', mapsUrl: '',
   defaultCity: 'ujjain',
   portrait: '',
 };
