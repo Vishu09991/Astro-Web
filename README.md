@@ -1,6 +1,6 @@
 # Shri Parashar Guruji
 
-Next.js App Router, TypeScript, Tailwind CSS, Motion and Lucide. Includes 92 catalogue entries, bilingual descriptions, service dialogs, gallery, location-aware Panchang integration, consultation enquiries, and a separate `/about` introduction with a slideshow.
+Next.js App Router, TypeScript, Tailwind CSS, Motion and Lucide. Includes 92 catalogue entries, bilingual descriptions, service dialogs, gallery, location-aware Panchang integration, consultation enquiries, and single-page anchor navigation. Legacy `/about` links redirect to `/#about`.
 
 ## Run
 
@@ -27,26 +27,20 @@ The server validates input and forwards name, phone, optional email, selected se
 
 ## Edit content and photos
 
-- `data/site.ts`: phone, WhatsApp, email, address, map link, default city, portrait and gallery.
+- `data/site.ts`: phone, WhatsApp, email, address, map link, default city, portrait and legacy photo metadata.
 - `data/translations/about.ts`: approved biography and philosophy in English and Hindi.
 - `data/translations/site.ts`: interface translations. Language is shared across routes and remembered on the device.
 - `data/services/index.ts`: complete bilingual service catalogue.
-- `public/images/`: original SVG artwork and your photographs. Add real photos here and set gallery `src` values such as `/images/guruji-puja.jpg`; update captions and alt text. The `/about` slideshow uses this same editable collection. It includes previous/next, arrow-key navigation, slide buttons and optional playback. Playback pauses on hover/focus and is disabled with reduced motion.
+- `public/images/gallery/`: add or remove JPEG, PNG, WebP or AVIF photographs here for the homepage gallery. `npm run dev` and `npm run build` discover files in natural filename order. Run `npm run gallery:sync` to refresh the list during development. Numbered filenames control the order, and the fullscreen viewer uses the originals.
 
 No personal photographs, qualifications, lineage or years of experience have been invented. Supply the approved introduction and actual photographs to replace the explicit placeholders.
 
 ## Panchang
 
-Set `PROKERALA_CLIENT_ID` and `PROKERALA_CLIENT_SECRET` for the Prokerala advanced Panchang API. The adapter uses Lahiri ayanamsa, IANA location timezones (including DST), local noon requests, and interval containment at sunrise. It preserves all returned Tithi, Nakshatra, Yoga and Karana transitions. The language selection is passed to the provider. Missing, malformed or failed data is shown as unavailable, never fabricated. Live provider credentials are required for end-to-end verification.
+Set the server-only `SHUBH_API_KEY` in the ignored `.env.local` file. On Vercel, add the same variable in the project Environment Variables and redeploy. Restart the development server after adding it locally.
 
-Festival dates need a verified location- and tradition-aware feed at `PANCHANG_FESTIVALS_URL`, optionally secured by `PANCHANG_FESTIVALS_TOKEN`. GET query parameters: `year`, `month`, `latitude`, `longitude`, `timezone`, `tradition` (`amanta` or `purnimanta`), and `language` (`en` or `hi`). Return JSON:
+The [ShubhAI Developer API](https://shubh.live/developers) uses local sunrise values and Amanta lunar months. The daily route maps ShubhAI’s daily Panchang and day periods, preserves the supplied ISO timestamps and timezone, and omits values the server cannot validate. The dedicated solar endpoint is used only when the daily and period responses lack solar timings. The calendar date dialog uses that same daily route. City selection is shared and curated cities are remembered locally. GPS is only used after clicking **Use my location**, and those coordinates are not persisted. Worldwide city search optionally uses `GEOCODING_API_KEY`.
 
-```json
-{"tradition":"purnimanta","timezone":"Asia/Kolkata","festivals":[]}
-```
+The monthly route uses the ShubhAI month, festivals and Ekadashi endpoints. It preserves provider dates and markers, including separate Smarta and Vaishnava dates and Parana timings. The Gregorian grid remains browsable during a provider outage. Run `node scripts/check-shubh.mjs` to inspect response shapes or `node --import tsx scripts/smoke-shubh.ts` to verify the app routes with the configured key. Both commands avoid logging the credential.
 
-Each festival is `{ "date": "YYYY-MM-DD", "name": "localized verified name", "kind": "localized category" }`. Dates must belong to the requested month. An empty array means the feed verified that no observances apply. An absent/failed feed means unknown, not no festivals. Include regional festivals, Jayantis, Ekadashi, Pradosh, Purnima, Amavasya, Sankashti and Navratri using the source's observance rules. Amanta/Purnimanta affects festival/month rules, not the astronomical angular intervals. Configure your provider quota, host request limits and long-running request timeout for month loading.
-
-## Remaining owner inputs
-
-Formspree form ID and verified recipient; actual photos and approved introduction; address/map link; Panchang credentials and verified festival feed. The requested reference PDF and calendar reference image were not supplied.
+The server client caches requests by endpoint, coordinates, and date range. It coalesces simultaneous requests and respects provider cooldowns. Caches and quota guards are per process. On a multi-instance deployment, enforce an appropriate shared quota at the hosting layer.

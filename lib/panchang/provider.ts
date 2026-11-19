@@ -1,6 +1,7 @@
 import {z} from 'zod';
-import {cities} from '@/data/site';
-import {atSunrise,localNoon,monthDates,providerSchema,type DayData,type MonthData} from './types';
+import {providerDateTime} from './live';
+import type {PanchangLocation} from './live';
+import {atSunrise,monthDates,providerSchema,type DayData,type MonthData} from './types';
 let token:{value:string;expires:number}|undefined;
 let tokenRequest:Promise<string>|undefined;
 const cache=new Map<string,{value:Promise<DayData>;expires:number}>();
@@ -10,11 +11,11 @@ async function accessToken(){
  tokenRequest=(async()=>{const res=await fetch('https://api.prokerala.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'client_credentials',client_id:process.env.PROKERALA_CLIENT_ID!,client_secret:process.env.PROKERALA_CLIENT_SECRET!}),signal:AbortSignal.timeout(15000),cache:'no-store'});if(!res.ok)throw new Error('Authentication unavailable');const result=z.object({access_token:z.string(),expires_in:z.number()}).parse(await res.json());token={value:result.access_token,expires:Date.now()+Math.max(0,result.expires_in-60)*1000};return token.value;})();
  try{return await tokenRequest;}finally{tokenRequest=undefined;}
 }
-async function day(date:string,city:typeof cities[number],language:'en'|'hi'):Promise<DayData>{
- const key=`${date}:${city.id}:${language}`;const existing=cache.get(key);if(existing&&existing.expires>Date.now())return existing.value;
+export async function day(date:string,city:PanchangLocation,language:'en'|'hi'):Promise<DayData>{
+ const key=`${date}:${city.latitude}:${city.longitude}:${city.timezone}:${language}`;const existing=cache.get(key);if(existing&&existing.expires>Date.now())return existing.value;
  if(cache.size>400)cache.delete(cache.keys().next().value!);
  const value=(async():Promise<DayData>=>{try{
- const params=new URLSearchParams({ayanamsa:'1',coordinates:`${city.latitude},${city.longitude}`,datetime:localNoon(date,city.timezone),timezone:city.timezone,la:language});
+ const params=new URLSearchParams({ayanamsa:'1',coordinates:`${city.latitude},${city.longitude}`,datetime:providerDateTime(date,city.timezone),la:language});
  const response=await fetch(`https://api.prokerala.com/v2/astrology/panchang/advanced?${params}`,{headers:{Authorization:`Bearer ${await accessToken()}`},signal:AbortSignal.timeout(20000),cache:'no-store'});
  if(response.status===401)token=undefined;
  if(!response.ok)throw new Error('Provider unavailable');
@@ -25,7 +26,7 @@ async function day(date:string,city:typeof cities[number],language:'en'|'hi'):Pr
  cache.set(key,{value,expires:Date.now()+6*60*60*1000});
  const result=await value;if(result.status==='unavailable')cache.set(key,{value,expires:Date.now()+60000});return result;
 }
-export async function getMonth(year:number,month:number,city:typeof cities[number],tradition:'amanta'|'purnimanta',language:'en'|'hi'='en'):Promise<MonthData>{
+export async function getMonth(year:number,month:number,city:PanchangLocation,tradition:'amanta'|'purnimanta',language:'en'|'hi'='en'):Promise<MonthData>{
  const dates=monthDates(year,month);const days:DayData[]=[];
  if(!process.env.PROKERALA_CLIENT_ID||!process.env.PROKERALA_CLIENT_SECRET){dates.forEach(date=>days.push({date,status:'unavailable',reason:'Panchang data is unavailable. The verified data connection has not been configured.'}));}
  else { // Bound concurrent calls; preserve all provider transitions rather than guessing daily values.
@@ -42,3 +43,5 @@ export async function getMonth(year:number,month:number,city:typeof cities[numbe
  }catch{ /* Unavailable is explicit; festival dates are never inferred from tithi alone. */ }}
  return {days,festivals,festivalStatus,source:'Prokerala · Lahiri ayanamsa',message:days.every(d=>d.status==='unavailable')?'Panchang data is unavailable. Dates remain browsable; no unverified lunar values are displayed.':undefined};
 }
+
+

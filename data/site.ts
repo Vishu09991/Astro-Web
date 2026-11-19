@@ -2,13 +2,14 @@ export const site = {
   name: 'Shri Parashar Guruji',
   phone: '+91 78781 49322', whatsapp: '917878149322', email: 'contact@parasharguruji.com', address: '', mapsUrl: '',
   defaultCity: 'ujjain',
-  portrait: '',
+  portrait: '/images/gallery/photo-25.jpg',
 };
 export const cities = [
   { id: 'ujjain', name: 'Ujjain, India', latitude: 23.1765, longitude: 75.7885, timezone: 'Asia/Kolkata' },
   { id: 'varanasi', name: 'Varanasi, India', latitude: 25.3176, longitude: 82.9739, timezone: 'Asia/Kolkata' },
   { id: 'delhi', name: 'New Delhi, India', latitude: 28.6139, longitude: 77.209, timezone: 'Asia/Kolkata' },
   { id: 'mumbai', name: 'Mumbai, India', latitude: 19.076, longitude: 72.8777, timezone: 'Asia/Kolkata' },
+  { id: 'chennai', name: 'Chennai, India', latitude: 13.0827, longitude: 80.2707, timezone: 'Asia/Kolkata' },
   { id: 'london', name: 'London, UK', latitude: 51.5074, longitude: -0.1278, timezone: 'Europe/London' },
   { id: 'new-york', name: 'New York, USA', latitude: 40.7128, longitude: -74.006, timezone: 'America/New_York' },
 ];

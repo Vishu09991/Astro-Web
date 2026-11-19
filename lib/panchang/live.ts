@@ -1,0 +1,14 @@
+import {z} from 'zod';
+import {dateInZone,localNoon,type Panchang,type Transition} from './types';
+export type PanchangSelection={location:PanchangLocation;setLocation:(location:PanchangLocation)=>void};
+export type PanchangLocation={id:string;name:string;latitude:number;longitude:number;timezone:string};
+export const fields=['tithi','nakshatra','yoga','karana'] as const;
+export function shiftDate(date:string,offset:number){const d=new Date(`${date}T12:00:00Z`);d.setUTCDate(d.getUTCDate()+offset);return d.toISOString().slice(0,10);}
+// Prokerala determines the local civil day from datetime's numeric UTC offset.
+export function providerDateTime(date:string,timezone:string){const instant=Date.parse(localNoon(date,timezone));const offset=(Date.parse(`${date}T12:00:00Z`)-instant)/60000;const sign=offset<0?'-':'+';const abs=Math.abs(offset);return `${date}T12:00:00${sign}${String(Math.floor(abs/60)).padStart(2,'0')}:${String(abs%60).padStart(2,'0')}`;}
+export function localMidnightAfter(now:number,timezone:string){const date=shiftDate(dateInZone(new Date(now),timezone),1);let value=Date.parse(`${date}T00:00:00Z`);for(let i=0;i<4;i++){const parts=new Intl.DateTimeFormat('en-GB',{timeZone:timezone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date(value));const part=(key:string)=>Number(parts.find(p=>p.type===key)?.value);const wall=Date.UTC(part('year'),part('month')-1,part('day'),part('hour'),part('minute'),part('second'));value+=Date.parse(`${date}T00:00:00Z`)-wall;}return value;}
+export function activeAt(values:Transition[]|undefined,now:number){return values?.find(v=>Date.parse(v.start)<=now&&now<Date.parse(v.end));}
+export function nextBoundary(data:Panchang|undefined,now:number,timezone:string){const times=[localMidnightAfter(now,timezone),now+300000];if(data){for(const field of fields)for(const v of data[field])times.push(Date.parse(v.start),Date.parse(v.end));for(const field of ['sunrise','sunset','moonrise','moonset'] as const)if(data[field])times.push(Date.parse(data[field]!));for(const v of [...(data.auspicious_period||[]),...(data.inauspicious_period||[])])for(const p of v.period)times.push(Date.parse(p.start),Date.parse(p.end));}return Math.min(...times.filter(t=>t>now+10));}
+export const calendarDateSchema=z.object({name:z.string(),month_name:z.string(),year:z.number(),leap:z.number().nullable().optional()});
+export const festivalFeedSchema=z.object({tradition:z.enum(['amanta','purnimanta']),timezone:z.string(),festivals:z.array(z.object({date:z.iso.date(),name:z.string(),kind:z.string()}))});
+export type LiveResponse={date:string;data:Panchang;previous?:Panchang;source:string;fetchedAt:string;stale:boolean;calendar?:z.infer<typeof calendarDateSchema>;festivals:z.infer<typeof festivalFeedSchema>['festivals'];festivalStatus:'available'|'unavailable';location:PanchangLocation;retryAfter?:number};

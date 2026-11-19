@@ -2,7 +2,7 @@ import {mkdirSync,writeFileSync} from 'node:fs';
 mkdirSync('public/images',{recursive:true});
 const petals=Array.from({length:16},(_,i)=>`<ellipse cx="200" cy="66" rx="17" ry="31" transform="rotate(${i*22.5} 200 200)"/>`).join('');
 const yantra=`<g fill="none" stroke="currentColor" stroke-width="1"><circle cx="200" cy="200" r="180"/><circle cx="200" cy="200" r="165"/><circle cx="200" cy="200" r="133"/>${petals}<path d="M200 69 318 274H82Z M200 325 77 113H323Z M200 105 298 275H102Z M200 292 104 126H296Z M200 137 280 276H120Z M200 267 125 137H275Z M200 166 265 279H135Z M200 245 148 155H252Z M200 183 234 242H166Z"/><circle cx="200" cy="218" r="4" fill="currentColor"/></g>`;
-writeFileSync('public/images/logo.svg',`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" style="color:#a67c32">${yantra}</svg>`);
+writeFileSync('public/images/logo.svg',`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" style="color:#9A6A1F">${yantra}</svg>`);
 const symbols={
 cosmos:'<circle cx="50" cy="50" r="31"/><circle cx="50" cy="50" r="22"/><path d="m50 18 28 49H22Z m0 64 28-49H22Z"/><circle cx="50" cy="50" r="5"/>',
 temple:'<path d="M19 80h62M26 74h48M33 70V45h34v25M28 45h44L50 15ZM39 33h22M43 25h14M44 70V54h12v16M50 15V7m0 0h12l-12 6"/>',

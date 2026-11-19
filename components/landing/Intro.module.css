@@ -1,0 +1,37 @@
+.sequence {
+  /* The page reveal starts at 2250ms and finishes at 2750ms. */
+  animation: reveal 2750ms linear both;
+}
+.shlokas {
+  display: grid;
+  place-items: center;
+  width: min(900px, calc(100% - 32px));
+  text-align: center;
+}
+.shlokas p {
+  grid-area: 1 / 1;
+  width: 100%;
+  margin: 0;
+  font-family:var(--devanagari);
+  font-size: clamp(20px, 3.2vw, 32px);
+  line-height: 1.8;
+  white-space: pre-line;
+  color: var(--brown);
+  opacity: 0;
+  animation: shloka 750ms ease-in-out both;
+}
+.shlokas p:nth-child(2) { animation-delay: 750ms; }
+.shlokas p:nth-child(3) { animation-delay: 1500ms; }
+@keyframes shloka {
+  0% { opacity: 0; transform: translateY(8px); }
+  20%, 80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes reveal {
+  0%, 81.8181818182% { opacity: 1; animation-timing-function: ease-in-out; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sequence { display: none; animation: none; }
+  .shlokas p { animation: none; }
+}

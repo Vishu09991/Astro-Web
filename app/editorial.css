@@ -1,0 +1,121 @@
+/* Shared type and spacing across the existing single-page layout. */
+:root {
+  --editorial-serif: Georgia, "Noto Serif Devanagari", serif;
+  --editorial-sans: "Segoe UI", "Noto Serif Devanagari", sans-serif;
+  --devanagari: "Noto Serif Devanagari", "Nirmala UI", serif;
+  --section-space: clamp(52px, 6vw, 88px);
+}
+
+body { font: 15px / 1.65 var(--editorial-sans); }
+h1, h2, h3 { font-family: var(--editorial-serif); letter-spacing: normal; }
+h1 { font-size: clamp(37px, 4.35vw, 63px); line-height: 1.12; }
+h2 { font-size: clamp(29px, 3.2vw, 42px); line-height: 1.23; }
+h3 { font-size: clamp(20px, 2vw, 25px); line-height: 1.35; }
+html[lang=hi] :is(h1,h2) { line-height: 1.4; }
+p { line-height: 1.7; }
+.eyebrow { font-size: 10px; letter-spacing: .09em; }
+.section { padding-block: var(--section-space); }
+.shell { width: min(1160px, calc(100% - clamp(32px, 9vw, 112px))); }
+.section-top { margin-bottom: 13px; }
+.section-heading { align-items: start; gap: 24px; margin: 12px 0 32px; }
+.section-heading > p { max-width: 38ch; font-size: 14px; }
+
+.brand > span { font-family: var(--editorial-serif); }
+.brand small { font-family: var(--editorial-sans); letter-spacing: .12em; }
+.desktop-nav { font-size: 13px; gap: clamp(10px, 1.25vw, 18px); }
+.button { gap: 10px; min-height: 44px; padding: 10px 17px; }
+.button:hover, .service-card:hover { transform: none; }
+.hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr); gap: clamp(18px, 5vw, 64px); padding-block: clamp(36px, 4vw, 64px) 54px; }
+.hero h1 { font-size: clamp(37px, 4.35vw, 63px); margin: 17px 0 16px; }
+.hero h1 em { display: block; }
+.hero-copy > p { max-width: 43ch; font-size: 15px; }
+.hero-actions { margin-top: 24px; }
+.hero-note { margin-top: 24px; }
+.hero-note p { font-size: 12px; letter-spacing: normal; }
+.hero-visual { max-width: 560px; }
+.hero-verse > span { font-family: var(--devanagari); }
+.hero-verse small, .art-caption { letter-spacing: .1em; }
+
+.about { grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); gap: clamp(28px, 7vw, 90px); }
+.portrait-frame { aspect-ratio: .94; padding: 0; width: 100%; max-width: 470px; }
+.portrait-frame > img { object-position: center 42%; }
+.portrait-label { position: relative; top: 100%; bottom: auto; left: auto; right: auto; border: 0; padding: 8px 0 0; text-align: left; font: 16px var(--devanagari); }
+.portrait-label span { display: inline; margin-inline-start: 8px; font: 11px var(--editorial-sans); }
+.portrait-label .portrait-sanskrit { margin: 0; font: inherit; color: inherit; }
+.about h2 { margin-bottom: 15px; }
+.about > div:last-child { max-width: 57ch; }
+.about p { font-size: 15px; margin-bottom: 13px; }
+
+.live-panel { box-shadow: none; }
+.live-location { gap: 16px; }
+.live-toolbar { padding: 20px 24px; }
+.live-elements { gap: 0; padding: 0; }
+.live-element, .live-element.prominent { border: 0; border-inline-start: 1px solid var(--line); background: transparent; padding: 18px 22px; }
+.live-element:first-child { border-inline-start: 0; }
+.live-element h3 { font-size: 23px; margin: 6px 0; }
+.live-element.prominent h3 { color: var(--brown); }
+.live-element :is(small, .detail-hint), .required-period, .live-status, .live-caption { font-size: 12px; }
+.live-source { font-size: 11px; }
+.live-bottom { padding: 24px; }
+
+.category-tabs { gap: 16px; }
+.category-tabs > .category-card > button {
+  align-items: start;
+  border: 0;
+  border-block-start: 1px solid var(--line);
+  padding: 12px 4px;
+  gap: 8px;
+}
+.category-tabs > .category-card > button[aria-pressed=true] {
+  color: var(--brown);
+  background: transparent;
+  border-color: var(--gold);
+}
+.category-tabs > .category-card > button[aria-pressed=true] small { color: var(--muted); }
+.category-tabs > .category-card > button > span { font: 21px / 1.3 var(--editorial-serif); }
+.category-tabs > .category-card > button small { font: 12px / 1.5 var(--editorial-sans); }
+.category-tabs > .category-card > button > svg:last-child { display: none; }
+.category-card > .text-link { margin-inline-start: 4px; }
+.service-grid { column-gap: 24px; row-gap: 0; }
+.service-card { border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 11px 2px; min-height: 0; }
+.service-card:hover { box-shadow: none; border-color: var(--gold); }
+.service-card strong { font: 17px / 1.35 var(--editorial-serif); }
+.service-card small, .search input, .catalogue-bar > span { font-size: 12px; }
+
+.calendar-day { font-size: 11px; }
+.calendar-day > strong { font-size: 12px; }
+.calendar-day .day-number { font-family: var(--editorial-serif); font-size: 23px; }
+.calendar-settings label > span, .calendar-legend, .calendar-notice { font-size: 12px; }
+.calendar-source { font-size: 11px; }
+
+.contact { gap: clamp(30px, 6vw, 86px); }
+.contact > div > p, .form-intro { font-size: 14px; }
+.contact-form { border: 0; border-top: 1px solid var(--line); padding: clamp(18px, 3vw, 34px); }
+.contact-form label { font-size: 13px; }
+.contact-form :is(input, textarea, select) { font-size: 15px; }
+.footer-main { gap: 22px; padding-block: 32px; }
+.footer-main > p { font-family: var(--editorial-serif); font-size: 16px; }
+.footer-bottom { font-size: 11px; }
+
+@media (max-width: 900px) {
+  .live-element { border-top: 1px solid var(--line); }
+  .live-element:nth-child(odd) { border-inline-start: 0; }
+  .live-bottom { gap: 24px; }
+}
+@media (max-width: 600px) {
+  .hero, .about { grid-template-columns: minmax(0, 1fr); }
+  .hero h1 { font-size: clamp(33px, 9.4vw, 48px); text-wrap: balance; }
+  .hero-visual { width: min(96%, 400px); }
+  .about { gap: 44px; }
+  .portrait-frame { max-width: 350px; }
+  .section-heading { gap: 12px; margin-bottom: 22px; }
+  .live-toolbar, .live-bottom { padding: 16px; }
+  .live-element, .live-element.prominent { padding: 12px; }
+  .live-element h3 { font-size: 20px; }
+  .category-tabs > .category-card > button { flex-direction: row; }
+  .category-tabs > .category-card > button > span { font-size: 18px; }
+  .service-grid { column-gap: 14px; }
+  .service-card { padding-right: 19px; }
+  .service-card > svg { right: 1px; top: 15px; }
+  .contact-form :is(input, textarea, select) { font-size: 16px; }
+}

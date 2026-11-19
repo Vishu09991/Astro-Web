@@ -4,8 +4,9 @@ export type Service = { id: string; name: Pair; category: string; group: string;
 type Seed = [string, string, string, string];
 export const categories = [
  { id: 'astrology', en: 'Astrology', hi: 'ज्योतिष', subtitle: 'A deeper understanding of your path' },
- { id: 'vastu', en: 'Vastu Consultation', hi: 'वास्तु परामर्श', subtitle: 'Bring intention to the spaces you inhabit' },
- { id: 'rituals', en: 'Puja & Rituals', hi: 'पूजा एवं अनुष्ठान', subtitle: 'Sacred practices for life’s meaningful moments' },
+ { id: 'vastu', en: 'Vastu Shastra', hi: 'वास्तु शास्त्र', subtitle: 'Bring intention to the spaces you inhabit' },
+ { id: 'pujas', en: 'Pujas', hi: 'पूजाएँ', subtitle: 'Traditional worship and Shanti Pujas' },
+ { id: 'rituals', en: 'Rituals', hi: 'अनुष्ठान', subtitle: 'Hawan, yagya, and life’s sacred milestones' },
 ];
 const groups: { category: string; en: string; hi: string; seeds: Seed[] }[] = [
 { category: 'astrology', en: 'Astrology', hi: 'ज्योतिष', seeds: [
@@ -24,7 +25,7 @@ const groups: { category: string; en: string; hi: string; seeds: Seed[] }[] = [
  ['Commercial Vastu','व्यावसायिक वास्तु','site layout and functional zones in commercial premises','व्यावसायिक परिसर के भूविन्यास और उपयोग क्षेत्रों का अध्ययन'],
  ['Vastu Shanti','वास्तु शांति','a traditional prayerful dedication of a living or working space','निवास या कार्यस्थल का पारंपरिक प्रार्थनामय समर्पण'],
 ]},
-{ category: 'rituals', en: 'Pujas', hi: 'पूजाएँ', seeds: [
+{ category: 'pujas', en: 'Pujas', hi: 'पूजाएँ', seeds: [
  ['Ganesh Puja','गणेश पूजा','invoking Shri Ganesha at the beginning of a new undertaking','नए कार्य के आरंभ में श्री गणेश का आवाहन'],
  ['Navagraha Puja','नवग्रह पूजा','worship of the nine grahas within the Vedic ritual tradition','वैदिक अनुष्ठान परंपरा में नौ ग्रहों की उपासना'],
  ['Lakshmi Puja','लक्ष्मी पूजा','honouring Goddess Lakshmi with gratitude for sustenance and abundance','समृद्धि और जीवनोपयोगी साधनों के लिए देवी लक्ष्मी का आभारपूर्ण पूजन'],
@@ -37,7 +38,7 @@ const groups: { category: string; en: string; hi: string; seeds: Seed[] }[] = [
  ['Bhoomi Pujan','भूमि पूजन','expressing reverence for the earth before construction','निर्माण से पहले पृथ्वी के प्रति श्रद्धा व्यक्त करना'],
  ['Hanuman Puja','हनुमान पूजा','honouring Hanuman’s devotion, courage, and service','हनुमान जी की भक्ति, साहस और सेवा का स्मरण'],
 ]},
-{ category: 'rituals', en: 'Shanti Pujas', hi: 'शांति पूजाएँ', seeds: [
+{ category: 'pujas', en: 'Shanti Pujas', hi: 'शांति पूजाएँ', seeds: [
  ['Graha Shanti','ग्रह शांति','prayers concerning planetary factors identified in a personal chart','व्यक्तिगत कुंडली में बताए गए ग्रह कारकों से संबंधित प्रार्थनाएँ'],
  ['Navagraha Shanti','नवग्रह शांति','collective propitiatory worship of all nine grahas','सभी नौ ग्रहों का सामूहिक शांति पूजन'],
  ['Vastu Shanti','वास्तु शांति','ritual reconciliation and dedication of a dwelling and its directions','निवास और उसकी दिशाओं का अनुष्ठानिक शांति पूजन'],
@@ -117,10 +118,10 @@ const groups: { category: string; en: string; hi: string; seeds: Seed[] }[] = [
 ];
 export const serviceGroups = groups.map(({en,hi,category}) => ({en,hi,category}));
 export const services: Service[] = groups.flatMap((group) => group.seeds.map(([en,hi,focus,focusHi], index) => {
- const consult = group.category !== 'rituals';
+ const consult = group.category === 'astrology' || group.category === 'vastu';
  const fire = group.en === 'Hawan & Yagya';
  return {
-  id: `${group.category}-${group.en.toLowerCase().replace(/[^a-z]+/g,'-')}-${index}`,
+  id: `${group.category === 'pujas' ? 'rituals' : group.category}-${group.en.toLowerCase().replace(/[^a-z]+/g,'-')}-${index}`,
   name: {en,hi}, category: group.category, group: group.en,
   image: `/images/${group.category === 'astrology' ? 'cosmos' : group.category === 'vastu' ? 'temple' : fire ? 'fire' : 'lotus'}.svg`,
   about: {en: `${en} focuses on ${focus}. The details are discussed individually, with respect for your circumstances and family tradition.`, hi: `${hi} का केंद्र है — ${focusHi}। आपकी परिस्थितियों और कुल परंपरा के अनुसार विवरण व्यक्तिगत संवाद में तय किए जाते हैं।`},

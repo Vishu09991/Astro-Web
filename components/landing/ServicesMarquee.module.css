@@ -1,0 +1,105 @@
+.strip {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-block: 1px solid var(--line);
+  background: #f4efe5;
+  color: var(--brown);
+}
+
+.viewport {
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.track, .sequence {
+  display: flex;
+  width: max-content;
+}
+
+.sequence {
+  flex: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: clamp(10px, 1.35vw, 20px);
+  padding-block: 21px;
+  white-space: nowrap;
+}
+
+.hindi {
+  font: 20px / 1.5 var(--devanagari);
+  color: var(--brown);
+}
+
+.english {
+  font: 600 12px / 1.5 var(--editorial-sans);
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Keep perspective on the ornament so the moving type stays on a flat plane. */
+.diamond {
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  margin-inline: clamp(8px, 1.7vw, 26px) clamp(18px, 3vw, 45px);
+  background: var(--gold);
+  transform: perspective(28px) rotateY(-14deg) rotate(45deg);
+  box-shadow: 1px 1px var(--line);
+}
+
+.control {
+  align-self: center;
+  display: none;
+  place-items: center;
+  flex: 0 0 46px;
+  min-height: 44px;
+  border: 0;
+  border-inline-start: 1px solid var(--line);
+  color: var(--brown);
+  background: transparent;
+}
+
+.control:hover { color: var(--gold); }
+.control:focus-visible, .viewport:focus-visible { outline-offset: -3px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .strip[data-ready=true] .viewport { overflow: clip; }
+  .strip[data-ready=true] .track {
+    animation: slide var(--duration) linear infinite;
+    will-change: transform;
+  }
+  .strip[data-ready=true] .control { display: grid; }
+  .strip[data-paused=true] .track, .viewport:focus-visible .track { animation-play-state: paused; }
+}
+
+@media (hover: hover) {
+  .strip:hover .track { animation-play-state: paused; }
+}
+
+/* Keep a single, manually scrollable sequence for reduced motion and before measurement. */
+.strip[data-ready=false] .sequence[aria-hidden=true] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sequence[aria-hidden=true] { display: none; }
+}
+
+@keyframes slide {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(-1 * var(--distance)), 0, 0); }
+}
+
+@media (max-width: 600px) {
+  .item { padding-block: 15px; }
+  .hindi { font-size: 18px; }
+  .english { font-size: 11px; }
+}

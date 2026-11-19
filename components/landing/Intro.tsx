@@ -1,10 +1,51 @@
 'use client';
-import {useLanguage} from '@/components/i18n/LanguageProvider';
-import {useEffect,useState} from 'react';
-import {AnimatePresence,motion,useReducedMotion} from 'motion/react';
-import {Yantra} from '@/components/ui/Yantra';
-export function Intro(){const {t:tr}=useLanguage();
- const [visible,setVisible]=useState(false);const reduced=useReducedMotion();
- useEffect(()=>{if(reduced || window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;try{if(sessionStorage.getItem('guruji-intro'))return;sessionStorage.setItem('guruji-intro','seen');}catch{}const show=setTimeout(()=>setVisible(true),0);const hide=setTimeout(()=>setVisible(false),2200);return()=>{clearTimeout(show);clearTimeout(hide);};},[reduced]);
- return <AnimatePresence>{visible&&<motion.div className="intro" initial={{opacity:1}} exit={{opacity:0}} transition={{duration:.45}}><Yantra className="intro-yantra"/><p lang="hi">ॐ गं गणपतये नमः॥</p><span className="eyebrow">{tr("A MOMENT OF STILLNESS. A JOURNEY WITHIN.")}</span><button className="text-button" onClick={()=>setVisible(false)}>{tr("Skip intro →")}</button></motion.div>}</AnimatePresence>;
+
+import { useEffect, useState } from 'react';
+import { useLanguage } from '@/components/i18n/LanguageProvider';
+import { Yantra } from '@/components/ui/Yantra';
+import styles from './Intro.module.css';
+
+// Survives internal navigation, resets on a full page load.
+let introPlayed = false;
+const shlokas = [
+  'ॐ गं गणपतये नमः॥',
+  'ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम्।\nउर्वारुकमिव बन्धनान्मृत्योर्मुक्षीय मामृतात्॥',
+  'ॐ नमो भगवते वासुदेवाय नमः',
+];
+
+export function Intro() {
+  const { t: tr } = useLanguage();
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (introPlayed) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Claim inside the callback so Strict Mode cleanup cannot consume the intro.
+    const show = window.setTimeout(() => {
+      if (introPlayed) return;
+      introPlayed = true;
+      if (!preference.matches) setVisible(true);
+    }, 0);
+    const onPreferenceChange = () => {
+      if (preference.matches) setVisible(false);
+    };
+    preference.addEventListener('change', onPreferenceChange);
+    return () => {
+      window.clearTimeout(show);
+      preference.removeEventListener('change', onPreferenceChange);
+    };
+  }, []);
+  if (!visible) return null;
+  return (
+    <div className={`intro ${styles.sequence}`} onAnimationEnd={(event) => {
+      // Ignore child fade events; remove only after the homepage reveal.
+      if (event.target === event.currentTarget) setVisible(false);
+    }}>
+      <Yantra className="intro-yantra" />
+      <div className={styles.shlokas}>
+        {shlokas.map((shloka) => <p lang="hi" key={shloka}>{shloka}</p>)}
+      </div>
+      <span className="eyebrow">{tr('A MOMENT OF STILLNESS. A JOURNEY WITHIN.')}</span>
+      <button className="text-button" onClick={() => setVisible(false)}>{tr('Skip intro →')}</button>
+    </div>
+  );
 }
