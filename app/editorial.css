@@ -1,9 +1,24 @@
 /* Shared type and spacing across the existing single-page layout. */
+@font-face {
+  font-family: "AMS Anaram Unicode";
+  src: url("/fonts/ams-anaram-unicode.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+200C-200D;
+}
+
 :root {
   --editorial-serif: Georgia, "Noto Serif Devanagari", serif;
   --editorial-sans: "Segoe UI", "Noto Serif Devanagari", sans-serif;
   --devanagari: "Noto Serif Devanagari", "Nirmala UI", serif;
   --section-space: clamp(52px, 6vw, 88px);
+}
+
+html[lang="hi"] {
+  --editorial-serif: "AMS Anaram Unicode", Georgia, "Noto Serif Devanagari", serif;
+  --editorial-sans: "AMS Anaram Unicode", "Segoe UI", "Noto Serif Devanagari", sans-serif;
+  --devanagari: "AMS Anaram Unicode", "Noto Serif Devanagari", "Nirmala UI", serif;
 }
 
 body { font: 15px / 1.65 var(--editorial-sans); }
@@ -34,7 +49,7 @@ p { line-height: 1.7; }
 .hero-note p { font-size: 12px; letter-spacing: normal; }
 .hero-visual { max-width: 560px; }
 .hero-verse > span { font-family: var(--devanagari); }
-.hero-verse small, .art-caption { letter-spacing: .1em; }
+.hero-verse small { letter-spacing: .1em; }
 
 .about { grid-template-columns: minmax(0, .85fr) minmax(0, 1fr); gap: clamp(28px, 7vw, 90px); }
 .portrait-frame { aspect-ratio: .94; padding: 0; width: 100%; max-width: 470px; }
@@ -47,7 +62,7 @@ p { line-height: 1.7; }
 .about p { font-size: 15px; margin-bottom: 13px; }
 
 .live-panel { box-shadow: none; }
-.live-location { gap: 16px; }
+.live-location { gap: 16px; margin-bottom: 16px; }
 .live-toolbar { padding: 20px 24px; }
 .live-elements { gap: 0; padding: 0; }
 .live-element, .live-element.prominent { border: 0; border-inline-start: 1px solid var(--line); background: transparent; padding: 18px 22px; }
@@ -55,7 +70,6 @@ p { line-height: 1.7; }
 .live-element h3 { font-size: 23px; margin: 6px 0; }
 .live-element.prominent h3 { color: var(--brown); }
 .live-element :is(small, .detail-hint), .required-period, .live-status, .live-caption { font-size: 12px; }
-.live-source { font-size: 11px; }
 .live-bottom { padding: 24px; }
 
 .category-tabs { gap: 16px; }
@@ -86,7 +100,6 @@ p { line-height: 1.7; }
 .calendar-day > strong { font-size: 12px; }
 .calendar-day .day-number { font-family: var(--editorial-serif); font-size: 23px; }
 .calendar-settings label > span, .calendar-legend, .calendar-notice { font-size: 12px; }
-.calendar-source { font-size: 11px; }
 
 .contact { gap: clamp(30px, 6vw, 86px); }
 .contact > div > p, .form-intro { font-size: 14px; }

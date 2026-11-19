@@ -47,11 +47,11 @@ export function Header() {
       <div className="shell nav" ref={bar}>
         <a href="#home" className="brand" aria-label={t('Shri Parashar Guruji home')} onClick={open ? closeMenu : undefined}>
           <Yantra />
-          <span>{t('Shri Parashar Guruji')}<small>{t('VEDIC WISDOM · SACRED TRADITIONS')}</small></span>
+          <span>{t('Shri Parashar Guruji')}</span>
         </a>
         <nav className="desktop-nav" aria-label={t('Main navigation')}>{links()}</nav>
         <LanguageToggle value={language} onChange={setLanguage} />
-        <a className="nav-consult" href="#contact" onClick={open ? closeMenu : undefined}>{t('Let’s connect')} <ArrowUpRight size={16} /></a>
+        <a className="nav-consult" href="#contact" onClick={open ? closeMenu : undefined}>{t('Book a Consultation')} <ArrowUpRight size={16} /></a>
         <button className="menu-button icon-button" aria-label={t(open ? 'Close menu' : 'Open menu')} aria-expanded={open} aria-controls="mobile-nav" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
       </div>
       {open && <nav id="mobile-nav" className="mobile-nav" aria-label={t('Mobile navigation')}>{links(true)}</nav>}

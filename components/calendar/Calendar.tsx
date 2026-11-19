@@ -8,6 +8,7 @@ import { cities } from '@/data/site';
 import { dateInZone, monthDates } from '@/lib/panchang/types';
 import type { PanchangSelection } from '@/lib/panchang/live';
 import type { ShubhDayResponse, ShubhMonth } from '@/lib/panchang/shubh-normalizer';
+import styles from './Festivals.module.css';
 
 type Result<T> = { key: string; revision: number; data?: T; error?: string };
 
@@ -76,6 +77,8 @@ export function Calendar({ location, setLocation }: PanchangSelection) {
   const first = dates.length ? new Date(dates[0] + 'T12:00:00Z').getUTCDay() : 0;
   const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const festivalsOn = (date: string) => month?.festivals?.filter(item => item.date === date) ?? [];
+  const festivals = month?.festivals && [...month.festivals].sort((first, second) => first.date.localeCompare(second.date));
+  const festivalDateFormat = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
   const ekadashiOn = (date: string) => month?.ekadashi?.filter(item => item.smartaDate === date || item.vaishnavaDate === date) ?? [];
   const formatTime = (value: string, zone = data?.tz ?? timezone) => new Intl.DateTimeFormat(locale, {
     timeZone: zone, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
@@ -89,8 +92,7 @@ export function Calendar({ location, setLocation }: PanchangSelection) {
 
   const retry = () => setRevision(value => value + 1);
   const loading = !result && !month;
-  const status = loading ? t('Loading verified Panchang data…')
-    : result?.error === 'rate_limited' ? (hi ? 'अनुरोध सीमा पूरी हुई। कुछ समय बाद पुनः प्रयास करें।' : 'The Panchang request limit was reached. Try again shortly.')
+  const status = loading ? t('Loading Panchang…')
     : result?.error ? t('Panchang data unavailable')
     : t('Select a day for all transitions and timings. Times are local to the selected city.');
 
@@ -98,7 +100,7 @@ export function Calendar({ location, setLocation }: PanchangSelection) {
     <section id="calendar" className="section calendar-section">
       <div className="shell">
         <span className="eyebrow">{hi ? 'मासिक पंचांग' : 'Monthly Panchang'}</span>
-        <div className="section-heading"><h2>{hi ? 'वैदिक कैलेंडर' : 'Vedic Calendar'}</h2><p>{t('Explore the Vedic calendar, daily Panchang, and religious observances for your chosen location.')}</p></div>
+        <div className="section-heading"><h2>{hi ? 'वैदिक कैलेंडर' : 'Vedic Calendar'}</h2></div>
         <div className="calendar-settings">
           <label><span><MapPin size={14} /> {t('Location')}</span><select value={location.id} onChange={event => {
             const city = cities.find(entry => entry.id === event.target.value);
@@ -108,7 +110,7 @@ export function Calendar({ location, setLocation }: PanchangSelection) {
             {!knownCity && <option value={location.id}>{t(location.name)}</option>}
             {cities.map(city => <option key={city.id} value={city.id}>{t(city.name)}</option>)}
           </select></label>
-          <p>{t('Amanta')} · {timezone}<br />{t('Daily values at local sunrise')}</p>
+          <p>{t('Amanta')}<br />{t('Daily values at local sunrise')}</p>
         </div>
         <div className="calendar-panel">
           <div className="calendar-toolbar">
@@ -140,15 +142,37 @@ export function Calendar({ location, setLocation }: PanchangSelection) {
           </div>
           <div className="calendar-legend"><span><i /> {t('Today')}</span><span>{t('Swipe to explore the full calendar on small screens')}</span></div>
         </div>
-        <div className="festival-panel">
-          <div><h3>{t('Festivals this month')}</h3></div>
-          {month?.festivals ? <div>{month.festivals.length ? month.festivals.map(item => <button key={item.date + item.name} className="festival-list-item" onClick={() => setSelected(item.date)}><span>{item.date}</span><strong>{item.name}</strong></button>) : <p>{t('No observances returned by the verified feed for this selection.')}</p>}</div> : <p>{t('Verified festival data is unavailable.')}</p>}
-        </div>
-        <p className="calendar-source"><a href="https://shubh.live" target="_blank" rel="noreferrer">{hi ? 'शुभएआई द्वारा' : 'Powered by ShubhAI'}</a></p>
+        <section className={styles.panel} aria-labelledby="festivals-heading">
+          <header className={styles.header}>
+            <h3 id="festivals-heading">{t('Festivals This Month')}</h3>
+            {today && <div className={styles.summary}>
+              <span>{months[view.month - 1]} {view.year}</span>
+              {festivals && <span className={styles.count}>
+                {festivals.length.toLocaleString(locale)} {hi ? 'पर्व' : festivals.length === 1 ? 'festival' : 'festivals'}
+              </span>}
+            </div>}
+          </header>
+          {festivals?.length ? <ul className={styles.grid}>
+            {festivals.map(item => {
+              const parts = festivalDateFormat.formatToParts(new Date(item.date + 'T12:00:00Z'));
+              return <li key={item.date + item.name}>
+                <button type="button" className={styles.card} onClick={() => setSelected(item.date)}>
+                  <time className={styles.date} dateTime={item.date}>
+                    <span className={styles.day}>{parts.find(part => part.type === 'day')?.value}</span>
+                    <span className={styles.month}>{parts.find(part => part.type === 'month')?.value}</span>
+                  </time>
+                  <strong className={styles.name}>{item.name}</strong>
+                </button>
+              </li>;
+            })}
+          </ul> : <p className={styles.empty}>
+            {t(loading ? 'Loading festivals…' : festivals ? 'No festivals listed for this month.' : 'Festival dates are unavailable.')}
+          </p>}
+        </section>
       </div>
       {selected && <Modal title={(hi ? 'दैनिक पंचांग ' : 'Daily Panchang ') + selected} onClose={() => setSelected(null)}>
         <div className="modal-content">
-          <span className="eyebrow">{t(location.name)} · {data?.tz ?? timezone}</span>
+          <span className="eyebrow">{t(location.name)}</span>
           <h2>{dateFormat.format(new Date(selected + 'T12:00:00Z'))}</h2>
           {data ? <>
             <div className="sun-times">{(['sunrise', 'sunset', 'moonrise', 'moonset'] as const).map((field, index) => {
@@ -160,7 +184,7 @@ export function Calendar({ location, setLocation }: PanchangSelection) {
               return item && <div className="detail-block" key={field}><h3>{(hi ? ['तिथि', 'नक्षत्र', 'योग', 'करण'] : ['Tithi', 'Nakshatra', 'Yoga', 'Karana'])[index]}</h3><p>{item.name}{item.paksha && ' · ' + item.paksha}{item.endsAt && ' · ' + t('ends') + formatTime(item.endsAt)}</p></div>;
             })}
             {!!detail?.data?.periods?.length && <div className="detail-block"><h3>{hi ? 'मुहूर्त' : 'Day periods'}</h3>{detail.data.periods.map(period => <p key={period.name + period.start}>{period.name} · {formatTime(period.start)} → {formatTime(period.end)}</p>)}</div>}
-          </> : <div className="empty-state"><p role="status">{t(detail?.error ? 'Panchang data unavailable' : 'Verified data is loading.')}</p>{detail?.error && <button className="icon-button" aria-label={t('Retry calendar')} onClick={() => setDetailRevision(value => value + 1)}><RotateCw size={16} /></button>}</div>}
+          </> : <div className="empty-state"><p role="status">{t(detail?.error ? 'Panchang data unavailable' : 'Loading Panchang…')}</p>{detail?.error && <button className="icon-button" aria-label={t('Retry calendar')} onClick={() => setDetailRevision(value => value + 1)}><RotateCw size={16} /></button>}</div>}
           {(festivalsOn(selected).length > 0 || ekadashiOn(selected).length > 0 || !!days.get(selected)?.markers.length) && <div className="detail-block"><h3>{t('Festivals & Vrats')}</h3>
             {days.get(selected)?.markers.map(marker => <p key={marker}>{marker}</p>)}
             {festivalsOn(selected).map(item => <p key={item.name}>{item.name}</p>)}

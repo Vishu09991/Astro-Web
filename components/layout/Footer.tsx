@@ -13,8 +13,7 @@ export function Footer() {
   return (
     <footer>
       <div className="shell footer-main">
-        <a href="#home" className="brand"><Yantra /><span>{t('Shri Parashar Guruji')}<small>{t('VEDIC WISDOM · SACRED TRADITIONS')}</small></span></a>
-        <p>{t('Ancient wisdom.')}<br />{t('A more harmonious tomorrow.')}</p>
+        <a href="#home" className="brand"><Yantra /><span>{t('Shri Parashar Guruji')}</span></a>
         <nav className="footer-quick-links" aria-label={language === 'hi' ? 'त्वरित नेविगेशन' : 'Quick navigation'}>
           {sectionLinks.slice(1).map(([name, id]) => <a key={id} href={'#' + id}>{name === 'Live Panchang' && language === 'hi' ? 'दैनिक पंचांग' : t(name)}</a>)}
         </nav>
@@ -25,7 +24,14 @@ export function Footer() {
         </div>
         <a href="#home" className="text-link">{t('Back to top ↑')}</a>
       </div>
-      <div className="shell footer-bottom"><span>© {new Date().getFullYear()} {t('Shri Parashar Guruji. All rights reserved.')}</span><span>{t('Tradition with reverence. Guidance with care.')}</span></div>
+      <div className="shell footer-bottom">
+        <span>© {new Date().getFullYear()} {t('Shri Parashar Guruji. All rights reserved.')}</span>
+        <span>
+          <a href="https://shubh.live" target="_blank" rel="noreferrer">{language === 'hi' ? 'पंचांग · शुभएआई' : 'Panchang · ShubhAI'}</a>
+          {' | '}{language === 'hi' ? 'शहर खोज' : 'City search'} · <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>
+          {' / '}<a href="https://www.geonames.org/" target="_blank" rel="noreferrer">GeoNames</a>
+        </span>
+      </div>
     </footer>
   );
 }

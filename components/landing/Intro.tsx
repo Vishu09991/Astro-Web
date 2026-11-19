@@ -36,7 +36,6 @@ export function Intro({ children }: { children: ReactNode }) {
           <div className={styles.shlokas}>
             {shlokas.map((shloka) => <p lang="hi" key={shloka}>{shloka}</p>)}
           </div>
-          <span className="eyebrow">{tr('A MOMENT OF STILLNESS. A JOURNEY WITHIN.')}</span>
           <button type="button" className="text-button" onClick={() => {
             setVisible(false);
             requestAnimationFrame(() => document.getElementById('main')?.focus({ preventScroll: true }));

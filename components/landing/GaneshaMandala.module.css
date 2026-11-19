@@ -1,12 +1,14 @@
 .layer {
   position: absolute;
-  top: 43%;
+  top: 39%;
   left: 50%;
   z-index: 0;
-  width: min(118%, calc(100vw - 24px));
+  width: min(114%, calc(100vw - 24px));
   aspect-ratio: 1;
   overflow: hidden;
   transform: translate(-50%, -50%);
+  /* Keep the lower fade stationary while the ornament rotates. */
+  mask-image: linear-gradient(to bottom, #000 73%, transparent 85%);
   color: var(--gold);
   opacity: .13;
   pointer-events: none;
@@ -19,12 +21,25 @@
   animation: rotate-mandala 75s linear infinite;
 }
 
+.emboss {
+  color: var(--brown);
+  stroke-width: 1.8;
+  opacity: .28;
+}
+
+.engraving { opacity: .8; }
+.innerTier { opacity: .72; }
+
 @keyframes rotate-mandala {
   to { transform: rotate(1turn); }
 }
 
 @media (max-width: 600px) {
-  .layer { width: min(112%, calc(100vw - 24px)); }
+  .layer {
+    width: min(108%, calc(100vw - 24px));
+    mask-image: linear-gradient(to bottom, #000 71%, transparent 84%);
+  }
+  .engraving { opacity: .65; }
 }
 
 @media (prefers-reduced-motion: reduce) {

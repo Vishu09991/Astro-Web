@@ -3,19 +3,12 @@
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Pause, Play, X } from 'lucide-react';
 import { useInView } from 'motion/react';
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
-import { flushSync } from 'react-dom';
+import { useEffect, useRef, useState, useSyncExternalStore, type TouchEvent } from 'react';
 import photos from '@/data/gallery-images.json';
 import { useLanguage } from '@/components/i18n/LanguageProvider';
 import styles from './Gallery.module.css';
 
 const wrap = (index: number, length: number) => ((index % length) + length) % length;
-const columns = () => window.innerWidth <= 600 ? 1 : window.innerWidth <= 1000 ? 2 : 3;
-const desktop = () => 3;
-function watchWidth(notify: () => void) {
-  window.addEventListener('resize', notify);
-  return () => window.removeEventListener('resize', notify);
-}
 const reducedQuery = '(prefers-reduced-motion: reduce)';
 function watchMotion(notify: () => void) {
   const query = window.matchMedia(reducedQuery);
@@ -23,12 +16,43 @@ function watchMotion(notify: () => void) {
   return () => query.removeEventListener('change', notify);
 }
 const reducedMotion = () => window.matchMedia(reducedQuery).matches;
+const groupSize = 3;
+const featuredSizes = '(max-width: 600px) calc(100vw - 40px), (min-width: 1312px) 715px, 60vw';
+const supportSizes = '(max-width: 600px) calc(50vw - 24px), (min-width: 1312px) 477px, 40vw';
+
+function useSwipe(move: (direction: number) => void, setTouching?: (touching: boolean) => void) {
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const handlers = {
+    onPointerDown: () => { swiped.current = false; },
+    onTouchStart: (event: TouchEvent) => {
+      const finger = event.touches[0];
+      start.current = event.touches.length === 1 ? { x: finger.clientX, y: finger.clientY } : null;
+      setTouching?.(true);
+    },
+    onTouchCancel: () => { start.current = null; setTouching?.(false); },
+    onTouchEnd: (event: TouchEvent) => {
+      const origin = start.current;
+      start.current = null;
+      setTouching?.(event.touches.length > 0);
+      if (!origin || event.touches.length) return;
+      const dx = event.changedTouches[0].clientX - origin.x;
+      const dy = event.changedTouches[0].clientY - origin.y;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        swiped.current = true;
+        move(dx < 0 ? 1 : -1);
+      }
+    },
+  };
+  return { handlers, swiped };
+}
 
 function Lightbox({ images, initial, close }: { images: string[]; initial: number; close: () => void }) {
   const { t, language } = useLanguage();
   const ref = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(initial);
   const step = (delta: number) => setIndex(value => wrap(value + delta, images.length));
+  const { handlers: swipeHandlers } = useSwipe(step);
   useEffect(() => {
     const dialog = ref.current!;
     const trigger = document.activeElement as HTMLElement | null;
@@ -50,7 +74,9 @@ function Lightbox({ images, initial, close }: { images: string[]; initial: numbe
         step(event.key === 'ArrowLeft' ? -1 : 1);
       }
     }}>
-    <Image src={images[index]} alt={label + ' ' + (index + 1)} fill unoptimized loading="eager" />
+    <div className={styles.lightboxImage} {...swipeHandlers}>
+      <Image src={images[index]} alt={label + ' ' + (index + 1)} fill unoptimized loading="eager" draggable={false} />
+    </div>
     <button type="button" autoFocus className={styles.close} onClick={close} aria-label={t('Close dialog')}><X /></button>
     {images.length > 1 && <>
       <button type="button" className={styles.previous} onClick={() => step(-1)} aria-label={t('Previous photograph')}><ChevronLeft /></button>
@@ -61,99 +87,119 @@ function Lightbox({ images, initial, close }: { images: string[]; initial: numbe
 
 export function PhotoCarousel({ images }: { images: string[] }) {
   const { t, language } = useLanguage();
-  const visible = Math.min(useSyncExternalStore(watchWidth, columns, desktop), images.length);
+  const hi = language === 'hi';
+  const pageCount = Math.ceil(images.length / groupSize);
   const reduced = useSyncExternalStore(watchMotion, reducedMotion, () => true);
   const section = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
+  const incoming = useRef<HTMLDivElement>(null);
   const inView = useInView(section);
-  const animation = useRef<Animation | null>(null);
-  const touch = useRef<{ x: number; y: number } | null>(null);
-  const swiped = useRef(false);
-  const [first, setFirst] = useState(0);
+  const [current, setCurrent] = useState(0);
+  const [pending, setPending] = useState<number | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
-  const [hover, setHover] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [touching, setTouching] = useState(false);
   const [paused, setPaused] = useState(false);
-  const loops = images.length > visible;
-
-  const move = useCallback((direction: number) => {
-    if (!loops || !track.current || animation.current) return;
-    if (reduced) {
-      setFirst(value => value + direction);
-      return;
-    }
-    // Keep one neighbor mounted on each side. After moving one panel,
-    // recycle the hidden neighbor while the visible photographs stay in place.
-    const element = track.current;
-    const stride = (element.children[1] as HTMLElement).offsetLeft - (element.children[0] as HTMLElement).offsetLeft;
-    const slide = element.animate([
-      { transform: 'translateX(' + -stride + 'px)' },
-      { transform: 'translateX(' + -(1 + direction) * stride + 'px)' },
-    ], { duration: 520, easing: 'cubic-bezier(.25,.75,.25,1)', fill: 'forwards' });
-    animation.current = slide;
-    slide.onfinish = () => {
-      flushSync(() => setFirst(value => value + direction));
-      slide.cancel();
-      animation.current = null;
-    };
-  }, [loops, reduced]);
-  useEffect(() => () => {
-    animation.current?.cancel();
-    animation.current = null;
-  }, [visible, reduced]);
+  const step = (direction: number) => {
+    if (pageCount > 1) setPending(wrap(current + direction, pageCount));
+  };
+  const { swiped, handlers } = useSwipe(step, setTouching);
+  const nextPage = pageCount > 1 ? wrap(current + 1, pageCount) : null;
+  const prepared = pending ?? (inView && !reduced && !paused ? nextPage : null);
 
   useEffect(() => {
-    if (!inView || !loops || paused || reduced || hover || focused || touching || selected !== null) return;
-    const timer = window.setInterval(() => { if (!document.hidden) move(1); }, 3500);
-    return () => window.clearInterval(timer);
-  }, [inView, loops, paused, reduced, hover, focused, touching, selected, move]);
+    if (pending === null || selected !== null || !incoming.current) return;
+    const page = pending;
+    const layer = incoming.current;
+    let active = true;
+    let fade: Animation | undefined;
 
-  if (!images.length) return null;
-  const slots = Array.from({ length: visible + (loops ? 2 : 0) }, (_, i) => first + i - (loops ? 1 : 0));
+    async function reveal() {
+      // Keep the old group in view while the incoming optimized images decode.
+      const images = Array.from(layer.querySelectorAll('img'));
+      await Promise.allSettled(images.map(image => image.decode()));
+      if (!active) return;
+      if (images.some(image => !image.naturalWidth)) {
+        setPending(null);
+        return;
+      }
+
+      if (!reduced && typeof layer.animate === 'function') {
+        fade = layer.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 360, easing: 'ease-in-out', fill: 'forwards',
+        });
+        await fade.finished.catch(() => {});
+        if (!active) return;
+      }
+      setCurrent(page);
+      setPending(null);
+    }
+
+    void reveal();
+    return () => {
+      active = false;
+      fade?.cancel();
+    };
+  }, [pending, reduced, selected]);
+
+  useEffect(() => {
+    if (!inView || nextPage === null || paused || reduced || touching || selected !== null || pending !== null) return;
+    const timer = window.setInterval(() => {
+      const gallery = section.current;
+      const hovered = window.matchMedia('(any-hover: hover)').matches && gallery?.matches(':hover');
+      const keyboardFocus = gallery?.contains(document.activeElement) && document.activeElement?.matches(':focus-visible');
+      if (!document.hidden && !hovered && !keyboardFocus) setPending(nextPage);
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, [inView, nextPage, paused, reduced, touching, selected, pending]);
+
+  if (!pageCount) return null;
+  const pages = prepared !== null && prepared !== current ? [current, prepared] : [current];
   return <section id="gallery" ref={section} className={'section shell ' + styles.gallery}
-    aria-label={language === 'hi' ? 'चित्र दीर्घा' : 'Photo gallery'}
-    onPointerEnter={e => { if (e.pointerType === 'mouse') setHover(true); }}
-    onPointerLeave={() => setHover(false)}
-    onFocusCapture={() => setFocused(true)}
-    onBlurCapture={e => { if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false); }}>
-    <div className={styles.viewport}
-      onTouchStart={e => {
-        touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        swiped.current = false;
-        setTouching(true);
-      }}
-      onTouchCancel={() => { touch.current = null; setTouching(false); }}
-      onTouchEnd={e => {
-        const start = touch.current;
-        touch.current = null;
-        setTouching(false);
-        if (!start) return;
-        const dx = e.changedTouches[0].clientX - start.x;
-        const dy = e.changedTouches[0].clientY - start.y;
-        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-          swiped.current = true;
-          move(dx < 0 ? 1 : -1);
+    aria-label={hi ? 'चित्र दीर्घा' : 'Photo gallery'}>
+    <div className={styles.viewport} {...handlers}>
+      {pages.map(page => {
+        const first = page * groupSize;
+        const group = images.slice(first, first + groupSize);
+        const offscreen = page !== current;
+        const entering = offscreen && page === pending;
+        return <div key={page} ref={entering ? incoming : undefined} className={styles.page}
+          data-offscreen={offscreen} data-entering={entering} data-count={group.length} inert={offscreen}>
+          {group.map((src, position) => {
+            const index = first + position;
+            const label = (hi ? 'तस्वीर ' : 'Photograph ') + (index + 1);
+            return <button type="button" className={styles.photo} key={src} aria-label={label}
+              onClick={event => {
+                if (!swiped.current || event.detail === 0) setSelected(index);
+                swiped.current = false;
+              }}>
+              <Image src={src} alt="" fill sizes={position === 0 ? featuredSizes : supportSizes}
+                loading={offscreen || inView ? 'eager' : 'lazy'} draggable={false} />
+            </button>;
+          })}
+        </div>;
+      })}
+    </div>
+    {pageCount > 1 && <div className={styles.controls} role="group" aria-label={hi ? 'दीर्घा नियंत्रण' : 'Gallery controls'}
+      onKeyDown={event => {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+          event.preventDefault();
+          step(event.key === 'ArrowLeft' ? -1 : 1);
         }
       }}>
-      <div ref={track} className={styles.track} data-loop={loops} style={{ '--columns': visible } as CSSProperties}>
-        {slots.map((slot, position) => {
-          const index = wrap(slot, images.length);
-          const hidden = loops && (position === 0 || position === slots.length - 1);
-          const label = (language === 'hi' ? 'तस्वीर ' : 'Photograph ') + (index + 1);
-          return <button type="button" className={styles.photo} key={slot} aria-label={label}
-            inert={hidden} onClick={() => { if (!swiped.current) setSelected(index); swiped.current = false; }}
-            onPointerDown={() => { swiped.current = false; }}>
-            <Image src={images[index]} alt="" fill sizes="(max-width:600px) 100vw, (max-width:1000px) 50vw, 33vw" draggable={false} />
-          </button>;
-        })}
+      <button type="button" className={styles.control} onClick={() => step(-1)}
+        aria-label={hi ? 'पिछली तस्वीरें' : 'Previous photographs'}><ChevronLeft size={18} /></button>
+      <div className={styles.pagination}>
+        {Array.from({ length: pageCount }, (_, page) =>
+          <button key={page} type="button" className={styles.dot}
+            aria-label={hi ? 'तस्वीरों का समूह ' + (page + 1) : 'Photo group ' + (page + 1)}
+            aria-current={page === current ? 'true' : undefined}
+            onClick={() => setPending(page === current ? null : page)} />
+        )}
       </div>
-      {loops && <>
-        <button type="button" className={styles.previous} onClick={() => move(-1)} aria-label={t('Previous photograph')}><ChevronLeft /></button>
-        <button type="button" className={styles.next} onClick={() => move(1)} aria-label={t('Next photograph')}><ChevronRight /></button>
-        {!reduced && <button type="button" className={styles.pause} onClick={() => setPaused(value => !value)} aria-label={t(paused ? 'Play slideshow' : 'Pause slideshow')}>{paused ? <Play size={16} /> : <Pause size={16} />}</button>}
-      </>}
-    </div>
+      <button type="button" className={styles.control} onClick={() => step(1)}
+        aria-label={hi ? 'अगली तस्वीरें' : 'Next photographs'}><ChevronRight size={18} /></button>
+      {!reduced && <button type="button" className={styles.control} onClick={() => setPaused(value => !value)}
+        aria-label={t(paused ? 'Play slideshow' : 'Pause slideshow')}>{paused ? <Play size={14} /> : <Pause size={14} />}</button>}
+    </div>}
     {selected !== null && <Lightbox images={images} initial={selected} close={() => setSelected(null)} />}
   </section>;
 }

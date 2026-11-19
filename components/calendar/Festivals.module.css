@@ -1,0 +1,115 @@
+.panel {
+  max-width: 1000px;
+  margin: 28px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.header,
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+
+.header {
+  margin-bottom: 12px;
+}
+
+.header h3 {
+  font-size: 22px;
+}
+
+.summary,
+.empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.count {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--brown);
+  background: var(--beige);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--brown);
+  text-align: start;
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--gold);
+    background: var(--beige);
+  }
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.date {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border-radius: 5px;
+  background: var(--beige);
+  color: #865f1e;
+}
+
+.day {
+  font-family: var(--editorial-serif);
+  font-size: 21px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.month {
+  font-size: 10px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.name {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}

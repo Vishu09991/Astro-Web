@@ -3,8 +3,8 @@ type Pair = { en: string; hi: string };
 export type Service = { id: string; name: Pair; category: string; group: string; image: string; about: Pair; significance: Pair; purpose: Pair; benefits: Pair; procedure: Pair; duration: Pair };
 type Seed = [string, string, string, string];
 export const categories = [
- { id: 'astrology', en: 'Astrology', hi: 'ज्योतिष', subtitle: 'A deeper understanding of your path' },
- { id: 'vastu', en: 'Vastu Shastra', hi: 'वास्तु शास्त्र', subtitle: 'Bring intention to the spaces you inhabit' },
+ { id: 'astrology', en: 'Astrology', hi: 'ज्योतिष', subtitle: 'Birth charts, compatibility, and muhurat' },
+ { id: 'vastu', en: 'Vastu Shastra', hi: 'वास्तु शास्त्र', subtitle: 'Consultations for homes and workplaces' },
  { id: 'pujas', en: 'Pujas', hi: 'पूजाएँ', subtitle: 'Traditional worship and Shanti Pujas' },
  { id: 'rituals', en: 'Rituals', hi: 'अनुष्ठान', subtitle: 'Hawan, yagya, and life’s sacred milestones' },
 ];
@@ -124,7 +124,7 @@ export const services: Service[] = groups.flatMap((group) => group.seeds.map(([e
   id: `${group.category === 'pujas' ? 'rituals' : group.category}-${group.en.toLowerCase().replace(/[^a-z]+/g,'-')}-${index}`,
   name: {en,hi}, category: group.category, group: group.en,
   image: `/images/${group.category === 'astrology' ? 'cosmos' : group.category === 'vastu' ? 'temple' : fire ? 'fire' : 'lotus'}.svg`,
-  about: {en: `${en} focuses on ${focus}. The details are discussed individually, with respect for your circumstances and family tradition.`, hi: `${hi} का केंद्र है — ${focusHi}। आपकी परिस्थितियों और कुल परंपरा के अनुसार विवरण व्यक्तिगत संवाद में तय किए जाते हैं।`},
+  about: {en: `${en} focuses on ${focus}.`, hi: `${hi} का केंद्र है — ${focusHi}।`},
   significance: {en: `${focus.charAt(0).toUpperCase()+focus.slice(1)} gives this ${consult ? 'consultation' : 'observance'} its particular place in traditional practice. Interpretations and customs may differ between lineages.`,hi: `${focusHi} इस ${consult ? 'परामर्श' : 'अनुष्ठान'} का विशिष्ट पारंपरिक आधार है। अलग-अलग गुरु परंपराओं में व्याख्या और रीति भिन्न हो सकती हैं।`},
   purpose: {en: `To explore ${focus} in a way that is meaningful to you and your family.`,hi: `${focusHi} को आपके और आपके परिवार के लिए अर्थपूर्ण तरीके से समझना और अपनाना।`},
   benefits: {en: `Traditionally, ${en} is approached as an opportunity for reflection, devotion, and a considered intention. These are matters of belief; no particular personal, financial, or health outcome is promised.`,hi: `परंपरागत मान्यता में ${hi} चिंतन, श्रद्धा और सजग संकल्प का अवसर है। ये आस्था से जुड़े विषय हैं; किसी व्यक्तिगत, आर्थिक या स्वास्थ्य परिणाम की गारंटी नहीं दी जाती।`},
